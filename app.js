@@ -73,44 +73,55 @@ const heroRole = document.getElementById('hero-role');
 const cardContainer = document.getElementById('card-container');
 const roleButtons = document.querySelectorAll('.role-btn');
 
-let currentFilter = 'all';
+// Guardamos los roles activos. Por defecto arrancan los 3 seleccionados
+let activeRoles = new Set(['Vanguard', 'Duelist', 'Strategist']);
 let isSpinning = false;
 
-// Manejo de clicks en los botones de filtro
+// Manejo de clicks con lógica Multiselect
 roleButtons.forEach(btn => {
     btn.addEventListener('click', () => {
-        if (isSpinning) return; // Bloquear cambio de filtro durante el giro
+        if (isSpinning) return;
 
-        // Cambiar clases visuales de los botones
-        roleButtons.forEach(b => {
-            b.classList.remove('bg-slate-800', 'text-white', 'border-slate-700');
-            b.classList.add('bg-slate-950', 'text-slate-400', 'border-slate-800');
-        });
-        
-        btn.classList.remove('bg-slate-950', 'text-slate-400', 'border-slate-800');
-        btn.classList.add('bg-slate-800', 'text-white', 'border-slate-700');
+        const role = btn.getAttribute('data-role');
 
-        currentFilter = btn.getAttribute('data-role');
+        if (activeRoles.has(role)) {
+            // Si ya está activo, lo removemos (Apagar filtro)
+            activeRoles.delete(role);
+            // Estilos visuales de botón desactivado/apagado
+            btn.className = btn.className.replace(/border-2 border-\w+-500/, 'border border-slate-800');
+            btn.classList.remove('bg-slate-900', 'text-blue-400', 'text-red-400', 'text-emerald-400');
+            btn.classList.add('bg-slate-950', 'text-slate-500');
+        } else {
+            // Si está apagado, lo encendemos
+            activeRoles.add(role);
+            // Restauramos sus colores dinámicos originales según el rol
+            btn.classList.remove('bg-slate-950', 'text-slate-500', 'border-slate-800');
+            btn.classList.add('bg-slate-900');
+            
+            if (role === 'Vanguard') btn.classList.add('border-2', 'border-blue-500', 'text-blue-400');
+            if (role === 'Duelist') btn.classList.add('border-2', 'border-red-500', 'text-red-400');
+            if (role === 'Strategist') btn.classList.add('border-2', 'border-emerald-500', 'text-emerald-400');
+        }
     });
 });
 
-// Función principal de la ruleta
+// Función de la ruleta
 function spinRoulette() {
     if (isSpinning) return;
     
-    // 1. Filtrar la pool de héroes según el rol seleccionado
-    const poolFiltrada = currentFilter === 'all' 
-        ? heroes 
-        : heroes.filter(h => h.role === currentFilter);
+    // Si el usuario desmarcó absolutamente todo, usamos todos los héroes por defecto
+    const rolesToFilter = activeRoles.size === 0 
+        ? ['Vanguard', 'Duelist', 'Strategist'] 
+        : Array.from(activeRoles);
 
-    if (poolFiltrada.length === 0) return;
+    // Filtrar la pool según los roles que queden en el Set
+    const poolFiltrada = heroes.filter(h => rolesToFilter.includes(h.role));
 
     isSpinning = true;
     spinBtn.disabled = true;
-    spinBtn.innerText = "Eligiendo...";
+    spinBtn.innerText = "Choosing...";
     
-    // Deshabilitar botones de filtro visualmente durante el giro
-    roleButtons.forEach(b => b.style.opacity = "0.5");
+    roleButtons.forEach(b => b.style.opacity = "0.4");
 
     let duration = 2000; 
     let intervalSpeed = 70; 
@@ -125,16 +136,14 @@ function spinRoulette() {
     setTimeout(() => {
         clearInterval(interval);
         
-        // Selección final dentro de la pool filtrada
         const finalHero = poolFiltrada[Math.floor(Math.random() * poolFiltrada.length)];
         updateUI(finalHero);
 
         heroImg.classList.remove('anim-ticking');
         isSpinning = false;
         spinBtn.disabled = false;
-        spinBtn.innerText = "Girar Ruleta";
+        spinBtn.innerText = "Spin Roulette";
         
-        // Restaurar botones de filtro
         roleButtons.forEach(b => b.style.opacity = "1");
         
         cardContainer.classList.add('scale-105');
@@ -143,26 +152,23 @@ function spinRoulette() {
     }, duration);
 }
 
-// Función para actualizar la interfaz
+// Actualizar la UI
 function updateUI(hero) {
     heroImg.src = hero.img;
     heroName.innerText = hero.name;
     heroRole.innerText = hero.role;
 
-    // Clases dinámicas de Tailwind extraídas de nuestro diccionario roleColors
     const classes = roleColors[hero.role] || roleColors['default'];
     const [borderColor, textColor, bgColor] = classes.split(' ');
 
-    // Actualizar contenedor
     cardContainer.className = `border-4 rounded-2xl p-6 shadow-2xl transition-all duration-300 transform mb-8 ${borderColor} ${bgColor}`;
-    // Actualizar texto del rol
     heroRole.className = `text-sm font-semibold tracking-widest uppercase mt-1 ${textColor}`;
 }
 
-// Event Listener del botón principal
+// Main button Event Listener
 spinBtn.addEventListener('click', spinRoulette);
 
-// Precarga de imágenes en caché
+// Cached images preloading
 window.addEventListener('DOMContentLoaded', () => {
     heroes.forEach(heroe => {
         const img = new Image();
