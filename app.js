@@ -1,10 +1,11 @@
-// --- Sound effects initialization ---
+// Audio Setup
 const tickSFX = new Audio('assets/tick.wav');
 const successSFX = new Audio('assets/success.wav');
-
-// Adjust volume if necessary (de 0.0 a 1.0)
 tickSFX.volume = 0.4; 
 successSFX.volume = 0.4;
+
+// Mute State
+let isMuted = false;
 
 // Hero data
 const heroes = [
@@ -82,6 +83,8 @@ const heroName = document.getElementById('hero-name');
 const heroRole = document.getElementById('hero-role');
 const cardContainer = document.getElementById('card-container');
 const roleButtons = document.querySelectorAll('.role-btn');
+const muteBtn = document.getElementById('mute-btn');
+const muteIcon = document.getElementById('mute-icon');
 
 // Guardamos los roles activos. Por defecto arrancan los 3 seleccionados
 let activeRoles = new Set(['Vanguard', 'Duelist', 'Strategist']);
@@ -144,8 +147,10 @@ function spinRoulette() {
         updateUI(randomHero);
 
         // REPRODUCIR TICK: Reiniciamos el audio al inicio para que pueda sonar superpuesto/rápido
-        tickSFX.currentTime = 0;
-        tickSFX.play().catch(err => console.log("Audio prevent:", err));
+        if (!isMuted) {
+            tickSFX.currentTime = 0;
+            tickSFX.play().catch(err => console.log("Audio prevent:", err));
+        }
     }, intervalSpeed);
 
     // Detener ruleta y dar resultado
@@ -155,9 +160,11 @@ function spinRoulette() {
         const finalHero = poolFiltrada[Math.floor(Math.random() * poolFiltrada.length)];
         updateUI(finalHero);
 
-        // REPRODUCIR ÉXITO
-        successSFX.currentTime = 0;
-        successSFX.play().catch(err => console.log("Audio prevent:", err));
+        // Play success.wav
+        if (!isMuted) {
+            successSFX.currentTime = 0;
+            successSFX.play().catch(err => console.log("Audio prevent:", err));
+        }
 
         heroImg.classList.remove('anim-ticking');
         isSpinning = false;
@@ -187,6 +194,35 @@ function updateUI(hero) {
 
 // Main button Event Listener
 spinBtn.addEventListener('click', spinRoulette);
+
+// Mute Button Listener
+muteBtn.addEventListener('click', () => {
+    isMuted = !isMuted; // Toggle the state
+
+    if (isMuted) {
+        // Change icon styling to "Muted" (Adds a visual cross/slash line to the SVG)
+        muteBtn.classList.remove('text-slate-400', 'border-slate-800');
+        muteBtn.classList.add('text-red-500', 'border-red-900/50', 'bg-red-950/10');
+        
+        // Dynamically inject a slash line into the SVG and hide sound waves
+        muteIcon.innerHTML = `
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line>
+            <line x1="17" y1="9" x2="23" y2="15"></line>
+        `;
+    } else {
+        // Restore icon styling to "Active"
+        muteBtn.classList.remove('text-red-500', 'border-red-900/50', 'bg-red-950/10');
+        muteBtn.classList.add('text-slate-400', 'border-slate-800');
+        
+        // Restore original waves inside the SVG
+        muteIcon.innerHTML = `
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path id="audio-wave-1" d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path id="audio-wave-2" d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+        `;
+    }
+});
 
 // Cached images preloading
 window.addEventListener('DOMContentLoaded', () => {
