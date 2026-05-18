@@ -1,11 +1,20 @@
-// 1. Data de los héroes (puedes expandirla con toda la pool de Marvel Rivals)
+// --- Sound effects initialization ---
+const tickSFX = new Audio('assets/tick.wav');
+const successSFX = new Audio('assets/success.wav');
+
+// Adjust volume if necessary (de 0.0 a 1.0)
+tickSFX.volume = 0.4; 
+successSFX.volume = 0.4;
+
+// Hero data
 const heroes = [
-    // --- DUELISTS (Daño / DPS) ---
+    // --- DUELISTS ---
     { name: "Black Cat", role: "Duelist", img: "assets/blackcat.webp" },
     { name: "Black Panther", role: "Duelist", img: "assets/blackpanther.webp" },
     { name: "Black Widow", role: "Duelist", img: "assets/blackwidow.webp" },
     { name: "Blade", role: "Duelist", img: "assets/blade.webp" },
     { name: "Daredevil", role: "Duelist", img: "assets/daredevil.webp" },
+    { name: "Deadpool", role: "Duelist", img: "assets/deadpool.webp" },
     { name: "Elsa Bloodstone", role: "Duelist", img: "assets/elsabloodstone.webp" },
     { name: "Hawkeye", role: "Duelist", img: "assets/hawkeye.webp" },
     { name: "Hela", role: "Duelist", img: "assets/hela.webp" },
@@ -27,7 +36,7 @@ const heroes = [
     { name: "Winter Soldier", role: "Duelist", img: "assets/wintersoldier.webp" },
     { name: "Wolverine", role: "Duelist", img: "assets/wolverine.webp" },
 
-    // --- VANGUARDS (Tanques) ---
+    // --- VANGUARDS ---
     { name: "Angela", role: "Vanguard", img: "assets/angela.webp" },
     { name: "Captain America", role: "Vanguard", img: "assets/captainamerica.webp" },
     { name: "Deadpool", role: "Vanguard", img: "assets/deadpool.webp" },
@@ -43,9 +52,10 @@ const heroes = [
     { name: "Thor", role: "Vanguard", img: "assets/thor.webp" },
     { name: "Venom", role: "Vanguard", img: "assets/venom.webp" },
 
-    // --- STRATEGISTS (Soportes / Healers) ---
+    // --- STRATEGISTS ---
     { name: "Adam Warlock", role: "Strategist", img: "assets/adamwarlock.webp" },
     { name: "Cloak & Dagger", role: "Strategist", img: "assets/cloakanddagger.webp" },
+    { name: "Deadpool", role: "Strategist", img: "assets/deadpool.webp" },
     { name: "Gambit", role: "Strategist", img: "assets/gambit.webp" },
     { name: "Invisible Woman", role: "Strategist", img: "assets/invisiblewoman.webp" },
     { name: "Jeff the Land Shark", role: "Strategist", img: "assets/jeffthelandshark.webp" },
@@ -57,7 +67,7 @@ const heroes = [
     { name: "White Fox", role: "Strategist", img: "assets/whitefox.webp" }
 ];
 
-// Colores correspondientes a cada rol para la UI
+// UI role colors
 const roleColors = {
     "Duelist": "border-red-500 text-red-400 bg-red-950/20",
     "Vanguard": "border-blue-500 text-blue-400 bg-blue-950/20",
@@ -65,7 +75,7 @@ const roleColors = {
     "default": "border-slate-700 text-slate-500 bg-slate-900"
 };
 
-// Elementos del DOM
+// DOM elements
 const spinBtn = document.getElementById('spin-btn');
 const heroImg = document.getElementById('hero-img');
 const heroName = document.getElementById('hero-name');
@@ -109,13 +119,13 @@ roleButtons.forEach(btn => {
 function spinRoulette() {
     if (isSpinning) return;
     
-    // Si el usuario desmarcó absolutamente todo, usamos todos los héroes por defecto
     const rolesToFilter = activeRoles.size === 0 
         ? ['Vanguard', 'Duelist', 'Strategist'] 
         : Array.from(activeRoles);
 
-    // Filtrar la pool según los roles que queden en el Set
     const poolFiltrada = heroes.filter(h => rolesToFilter.includes(h.role));
+
+    if (poolFiltrada.length === 0) return;
 
     isSpinning = true;
     spinBtn.disabled = true;
@@ -128,16 +138,26 @@ function spinRoulette() {
     
     heroImg.classList.add('anim-ticking');
 
+    // Intervalo de giro (Efecto ruleta)
     const interval = setInterval(() => {
         const randomHero = poolFiltrada[Math.floor(Math.random() * poolFiltrada.length)];
         updateUI(randomHero);
+
+        // REPRODUCIR TICK: Reiniciamos el audio al inicio para que pueda sonar superpuesto/rápido
+        tickSFX.currentTime = 0;
+        tickSFX.play().catch(err => console.log("Audio prevent:", err));
     }, intervalSpeed);
 
+    // Detener ruleta y dar resultado
     setTimeout(() => {
         clearInterval(interval);
         
         const finalHero = poolFiltrada[Math.floor(Math.random() * poolFiltrada.length)];
         updateUI(finalHero);
+
+        // REPRODUCIR ÉXITO
+        successSFX.currentTime = 0;
+        successSFX.play().catch(err => console.log("Audio prevent:", err));
 
         heroImg.classList.remove('anim-ticking');
         isSpinning = false;
