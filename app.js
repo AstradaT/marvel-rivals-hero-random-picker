@@ -126,9 +126,9 @@ function spinRoulette() {
         ? ['Vanguard', 'Duelist', 'Strategist'] 
         : Array.from(activeRoles);
 
-    const poolFiltrada = heroes.filter(h => rolesToFilter.includes(h.role));
+    const filteredPool = heroes.filter(h => rolesToFilter.includes(h.role));
 
-    if (poolFiltrada.length === 0) return;
+    if (filteredPool.length === 0) return;
 
     isSpinning = true;
     spinBtn.disabled = true;
@@ -143,7 +143,7 @@ function spinRoulette() {
 
     // Intervalo de giro (Efecto ruleta)
     const interval = setInterval(() => {
-        const randomHero = poolFiltrada[Math.floor(Math.random() * poolFiltrada.length)];
+        const randomHero = filteredPool[Math.floor(Math.random() * filteredPool.length)];
         
         // Pass a custom flag 'true' to show it's just spinning
         updateUI(randomHero, true);
@@ -159,26 +159,38 @@ function spinRoulette() {
     setTimeout(() => {
         clearInterval(interval);
         
-        const finalHero = poolFiltrada[Math.floor(Math.random() * poolFiltrada.length)];
+        const finalHero = filteredPool[Math.floor(Math.random() * filteredPool.length)];
         
-        // Pass 'false' so it loads the animated WebP asset
-        updateUI(finalHero, false);
-
-        // Play success.wav
-        if (!isMuted) {
-            successSFX.currentTime = 0;
-            successSFX.play().catch(err => console.log("Audio prevent:", err));
-        }
-
+        // Remove the spinning blur effect right away
         heroImg.classList.remove('roulette-blur', 'anim-ticking');
-        isSpinning = false;
-        spinBtn.disabled = false;
-        spinBtn.innerText = "Spin Roulette";
-        
-        roleButtons.forEach(b => b.style.opacity = "1");
-        
-        cardContainer.classList.add('scale-105');
-        setTimeout(() => cardContainer.classList.remove('scale-105'), 300);
+
+        // Step A: Immediately show the CORRECT final hero's STATIC image as a placeholder
+        updateUI(finalHero, true);
+
+        // Step B: Create an off-screen image element to preload the heavy animated WebP safely
+        const imgPreloader = new Image();
+        imgPreloader.src = finalHero.img;
+
+        // Step C: The moment the browser confirms the animated file is 100% downloaded...
+        imgPreloader.onload = () => {
+            // ...swap the source to the moving version seamlessly!
+            updateUI(finalHero, false);
+
+            // Play success.wav
+            if (!isMuted) {
+                successSFX.currentTime = 0;
+                successSFX.play().catch(err => console.log("Audio prevent:", err));
+            }
+
+            cardContainer.classList.add('scale-105');
+            setTimeout(() => cardContainer.classList.remove('scale-105'), 300);
+
+            // Reset the application state flags so the user can spin again
+            isSpinning = false;
+            spinBtn.disabled = false;
+            spinBtn.innerText = "Spin Roulette";
+            roleButtons.forEach(b => b.style.opacity = "1");
+        };
 
     }, duration);
 }
