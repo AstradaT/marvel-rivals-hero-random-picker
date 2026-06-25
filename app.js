@@ -14,6 +14,7 @@ const heroes = [
     { name: "Black Panther", role: "Duelist", img: "assets/blackpanther.webp", staticImg: "assets/static/blackpanther.jpg" },
     { name: "Black Widow", role: "Duelist", img: "assets/blackwidow.webp", staticImg: "assets/static/blackwidow.jpg" },
     { name: "Blade", role: "Duelist", img: "assets/blade.webp", staticImg: "assets/static/blade.jpg" },
+    { name: "Cyclops", role: "Duelist", img: "assets/cyclops.webp", staticImg: "assets/static/cyclops.jpg" },
     { name: "Daredevil", role: "Duelist", img: "assets/daredevil.webp", staticImg: "assets/static/daredevil.jpg" },
     { name: "Deadpool", role: "Duelist", img: "assets/deadpool.webp", staticImg: "assets/static/deadpool.jpg" },
     { name: "Elsa Bloodstone", role: "Duelist", img: "assets/elsabloodstone.webp", staticImg: "assets/static/elsabloodstone.jpg" },
