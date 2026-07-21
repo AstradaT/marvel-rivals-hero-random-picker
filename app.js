@@ -61,6 +61,7 @@ const heroes = [
     { name: "Gambit", role: "Strategist", img: "assets/gambit.webp", staticImg: "assets/static/gambit.jpg" },
     { name: "Invisible Woman", role: "Strategist", img: "assets/invisiblewoman.webp", staticImg: "assets/static/invisiblewoman.jpg" },
     { name: "Jeff the Land Shark", role: "Strategist", img: "assets/jeffthelandshark.webp", staticImg: "assets/static/jeffthelandshark.jpg" },
+    { name: "Jubilee", role: "Strategist", img: "assets/jubilee.webp", staticImg: "assets/static/jubilee.jpg"},
     { name: "Loki", role: "Strategist", img: "assets/loki.webp", staticImg: "assets/static/loki.jpg" },
     { name: "Luna Snow", role: "Strategist", img: "assets/lunasnow.webp", staticImg: "assets/static/lunasnow.jpg" },
     { name: "Mantis", role: "Strategist", img: "assets/mantis.webp", staticImg: "assets/static/mantis.jpg" },
